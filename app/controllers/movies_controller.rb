@@ -8,9 +8,20 @@ class MoviesController < ApplicationController
     end
   
     def index
-      list = Movie.all
-      if params[:grating]
-        list = Movie.order(sort_column).select { |m| m.rating == "G"}
+      list = Movie.all.order(sort_column)
+      if(params[:grating] == "on" || params[:pgrating] == "on" || params[:pg13rating] == "on" || params[:rrating] == "on")
+        if params[:grating] != "on"
+          list = list.reject { |m| m.rating == "G"}
+        end
+        if params[:pgrating] != "on"
+          list = list.reject { |m| m.rating == "PG"}
+        end
+        if params[:pg13rating] != "on"
+          list = list.reject { |m| m.rating == "PG-13"}
+        end
+        if params[:rrating] != "on"
+          list = list.reject { |m| m.rating == "R"}
+        end
       end
       @movies = list
     end

@@ -8,7 +8,11 @@ class MoviesController < ApplicationController
     end
   
     def index
-      @movies = Movie.all.order(sort_column)
+      list = Movie.all
+      if params[:grating]
+        list = Movie.order(sort_column).select { |m| m.rating == "G"}
+      end
+      @movies = list
     end
   
     def new

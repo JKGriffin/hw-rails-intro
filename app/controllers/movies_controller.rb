@@ -8,18 +8,31 @@ class MoviesController < ApplicationController
     end
   
     def index
-      list = Movie.all.order(sort_column)
+      #update session parameters for filters ~ only if at least 1 is on
       if(params[:grating] == "on" || params[:pgrating] == "on" || params[:pg13rating] == "on" || params[:rrating] == "on")
-        if params[:grating] != "on"
+        session[:grating] = params[:grating]
+        session[:pgrating] = params[:pgrating]
+        session[:pg13rating] = params[:pg13rating]
+        session[:rrating] = params[:rrating]
+      end
+      #update session parameter for sorting
+      if(Movie.column_names.include?(params[:sort]))
+        session[:sort] = params[:sort]
+      end
+      #sorts movies
+      list = Movie.all.order(sort_column)
+      #updates list to include only desired filters ~ only if at least 1 is on
+      if(session[:grating] == "on" || session[:pgrating] == "on" || session[:pg13rating] == "on" || session[:rrating] == "on")
+        if session[:grating] != "on"
           list = list.reject { |m| m.rating == "G"}
         end
-        if params[:pgrating] != "on"
+        if session[:pgrating] != "on"
           list = list.reject { |m| m.rating == "PG"}
         end
-        if params[:pg13rating] != "on"
+        if session[:pg13rating] != "on"
           list = list.reject { |m| m.rating == "PG-13"}
         end
-        if params[:rrating] != "on"
+        if session[:rrating] != "on"
           list = list.reject { |m| m.rating == "R"}
         end
       end
@@ -58,7 +71,7 @@ class MoviesController < ApplicationController
     # Making "internal" methods private is not required, but is a common practice.
     # This helps make clear which methods respond to requests, and which ones do not.
     def sort_column
-      Movie.column_names.include?(params[:sort]) ? params[:sort] : "id"
+      Movie.column_names.include?(session[:sort]) ? session[:sort] : "id"
     end
     
     def movie_params
